@@ -167,7 +167,7 @@ spread_.sf <- function(data, key_col, value_col, fill = NA,
 #' @name tibble
 #' @export
 type_sum.sfc <- function(x, ...) {
-   "simple_feature"
+   "sf"
 }
 
 #' Summarize simple feature item for tibble
