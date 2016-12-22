@@ -11,3 +11,9 @@ test_that("well-known text", {
   sfc = st_sfc(p1,p2)
   expect_identical(st_as_text(sfc), c("POINTZ(1 2 3)", "POINTZ(5 6 7)"))
 })
+
+test_that("wkt supports large geometries", {
+  wkt <- paste0("MULTIPOINT(", paste0(rep("-83.93 34.98", 5e3), collapse = ", "), ")") 
+  expect_identical(wkt, st_as_sfc(wkt) %>% st_as_text())
+  expect_identical(st_as_sfc(wkt), st_as_sfc(wkt) %>% st_as_text() %>% st_as_sfc())
+})
