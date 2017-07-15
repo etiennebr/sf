@@ -241,7 +241,7 @@ get_possibly_new_srid = function(conn, proj4string, debug = FALSE) {
 		wkt = st_as_text(st_crs(proj4string))
 		query = DEBUG(paste0("INSERT INTO spatial_ref_sys (srid,srtext,proj4text) VALUES (",
 			srid, ",'", wkt, "','",  proj4string, "');"))
-		dbExecute(conn, query)
+		tryCatch(dbExecute(conn, query), error = function(...) stop("Can't insert new srid to  table `spatial_ref_sys` either change srid  or change table permission."))
 		srid
 	}
 }
