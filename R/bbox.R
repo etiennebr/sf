@@ -124,3 +124,17 @@ st_bbox.sfc = function(obj) bb_wrap(structure(rep(NA_real_, 4), names = c("xmin"
 #' @export
 #' @name st_bbox
 st_bbox.sf = function(obj) st_bbox(st_geometry(obj))
+
+#' @export
+#' @name st_bbox
+st_envelope = function(obj) UseMethod("st_envelope")
+
+st_envelope.bbox = function(obj) {
+	st_sfc(st_polygon(
+		list( # min max matching
+			matrix(obj[c(1, 3, 3, 1, 1, 2, 2, 4, 4, 2)], ncol = 2))))
+}
+
+st_envelope.sf = function(obj) {
+	st_envelope(st_bbox(obj))
+}
