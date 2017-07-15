@@ -69,9 +69,7 @@ if (sf_extSoftVersion()["GEOS"] >= "3.5.0") {
  box = st_polygon(list(rbind(c(0,0),c(1,0),c(1,1),c(0,1),c(0,0))))
  v = st_sfc(st_voronoi(x, st_sfc(box)))
  plot(v, col = 0, border = 1, axes = TRUE)
- plot(box, add = TRUE, col = 0, border = 1) # a larger box is returned, as documented
- plot(x, add = TRUE, col = 'red', cex=2, pch=16)
- plot(st_intersection(st_cast(v), box)) # clip to smaller box
+ plot(box, add = TRUE, col = 0, border = 1)
  plot(x, add = TRUE, col = 'red', cex=2, pch=16)
 
  v = st_voronoi(x)

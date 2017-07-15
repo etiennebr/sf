@@ -381,32 +381,34 @@ st_triangulate.sf = function(x, dTolerance = 0.0, bOnlyEdges = FALSE) {
 #' @name geos
 #' @export
 #' @param envelope object of class \code{sfc} or \code{sfg} with the envelope for a voronoi diagram
-#' @details \code{st_voronoi} requires GEOS version 3.4 or above
+#' @param clip_to_envelope Logical. Should the result be intersected with the envelope? (default TRUE) See details.
+#' @details \code{st_voronoi} requires GEOS version 3.4 or above. GEOS returns a voronoi clipped to the larger of the supplied envelope or to an envelope determined by the input sites. By using \code{clip_to_envelope} it ensure that the voronoi is limited by the envelope.
 #' @examples
 #' set.seed(1)
 #' x = st_multipoint(matrix(runif(10),,2))
 #' box = st_polygon(list(rbind(c(0,0),c(1,0),c(1,1),c(0,1),c(0,0))))
 #' if (sf_extSoftVersion()["GEOS"] >= "3.5.0") {
-#'  v = st_sfc(st_voronoi(x, st_sfc(box)))
+#'  v = st_voronoi(x, st_sfc(box))
 #'  plot(v, col = 0, border = 1, axes = TRUE)
-#'  plot(box, add = TRUE, col = 0, border = 1) # a larger box is returned, as documented
-#'  plot(x, add = TRUE, col = 'red', cex=2, pch=16)
-#'  plot(st_intersection(st_cast(v), box)) # clip to smaller box
+#'  plot(box, add = TRUE, col = 0, border = 1)
 #'  plot(x, add = TRUE, col = 'red', cex=2, pch=16)
 #' }
-st_voronoi = function(x, envelope, dTolerance = 0.0, bOnlyEdges = FALSE)
+st_voronoi = function(x, envelope = st_convex_hull(st_union(x)), dTolerance = 0.0, bOnlyEdges = FALSE, clip_to_envelope = TRUE)
 	UseMethod("st_voronoi")
 
 #' @export
-st_voronoi.sfg = function(x, envelope = list(), dTolerance = 0.0, bOnlyEdges = FALSE)
+st_voronoi.sfg = function(x, envelope = list(), dTolerance = 0.0, bOnlyEdges = FALSE, clip_to_envelope = TRUE)
 	get_first_sfg(st_voronoi(st_sfc(x), st_sfc(envelope), dTolerance, bOnlyEdges = bOnlyEdges))
 
 #' @export
-st_voronoi.sfc = function(x, envelope = list(), dTolerance = 0.0, bOnlyEdges = FALSE) {
+st_voronoi.sfc = function(x, envelope = list(), dTolerance = 0.0, bOnlyEdges = FALSE, clip_to_envelope = TRUE) {
 	if (sf_extSoftVersion()["GEOS"] >= "3.5.0") {
 		if (isTRUE(st_is_longlat(x)))
 			warning("st_voronoi does not correctly triangulate longitude/latitude data")
-		st_sfc(CPL_geos_voronoi(x, st_sfc(envelope), dTolerance = dTolerance, bOnlyEdges = bOnlyEdges))
+		y <- st_sfc(CPL_geos_voronoi(x, st_sfc(envelope), dTolerance = dTolerance, bOnlyEdges = bOnlyEdges))
+		if(clip_to_envelope)
+			y <- st_intersection(st_cast(y), envelope)
+		return(y)
 	} else
 		stop("for voronoi, GEOS version 3.5.0 or higher is required")
 }
