@@ -153,16 +153,19 @@ Polygons2POLYGON = function(PolygonsLst) {
 
 #' @name as
 #' @rdname coerce-methods
+#' @importClassesFrom sp Spatial
 #' @aliases coerce,Spatial,sf-method
 setAs("Spatial", "sf", function(from) st_as_sf(from))
 
 #' @name as
 #' @rdname coerce-methods
+#' @importClassesFrom sp Spatial
 #' @aliases coerce,Spatial,sfc-method
 setAs("Spatial", "sfc", function(from) st_as_sfc(from))
 
 #' @name as
 #' @rdname coerce-methods
+#' @importClassesFrom sp Spatial
 #' @aliases coerce,sf,Spatial-method
 setAs("sf", "Spatial", function(from) {
 	if (!requireNamespace("sp", quietly = TRUE))
@@ -175,6 +178,7 @@ setAs("sf", "Spatial", function(from) {
 
 #' @name as
 #' @rdname coerce-methods
+#' @importClassesFrom sp Spatial
 #' @aliases coerce,sfc,Spatial-method
 setAs("sfc", "Spatial", function(from) as_Spatial(from))
 
