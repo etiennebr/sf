@@ -37,6 +37,7 @@ Suggests:
 	raster,
 	RSQLite,
     RPostgreSQL,
+    RPostgres,
     tibble,
 	rlang,
 	dplyr (>= 0.7-0),

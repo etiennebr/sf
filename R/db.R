@@ -20,8 +20,7 @@
 #' }
 #' @name st_read
 #' @details in case geom_column is missing: if table is missing, this function will try to read the name of the geometry column from table \code{geometry_columns}, in other cases, or when this fails, the geom_column is assumed to be the last column of mode character. If table is missing, the SRID cannot be read and resolved into a proj4string by the database, and a warning will be given.
-#' @export
-st_read_db = function(conn = NULL, table = NULL, query = NULL,
+st_read.PostgreSQLConnection = function(conn = NULL, table = NULL, query = NULL,
 					  geom_column = NULL, EWKB, ...) {
 	if (is.null(conn))
 		stop("no connection provided")
@@ -77,6 +76,8 @@ st_read_db = function(conn = NULL, table = NULL, query = NULL,
 	st_sf(tbl, ...)
 }
 
+st_read.PqConnection <- function(...) stop("st_read not available for PqConnection.")
+
 #' Write simple feature table to a spatial database
 #'
 #' Write simple feature table to a spatial database
@@ -100,8 +101,8 @@ st_read_db = function(conn = NULL, table = NULL, query = NULL,
 #'   if (exists("conn") && !inherits(conn, "try-error"))
 #'     st_write_db(conn, sf, "meuse_tbl", drop = FALSE)
 #' }
-#' @details st_write_db was written with help of Josh London, see \url{https://github.com/r-spatial/sf/issues/285}
-st_write_db = function(conn = NULL, obj, table = deparse(substitute(obj)), geom_name = "wkb_geometry",
+#' @details database reading was written with help of Josh London, see \url{https://github.com/r-spatial/sf/issues/285}
+st_write.PostgreSQLConnection = function(conn = NULL, obj, table = deparse(substitute(obj)), geom_name = "wkb_geometry",
 		..., drop = FALSE, debug = FALSE, binary = TRUE, append = FALSE) {
 
 	DEBUG = function(x) { if (debug) message(x); x }
@@ -161,6 +162,10 @@ st_write_db = function(conn = NULL, obj, table = deparse(substitute(obj)), geom_
 			" DROP COLUMN IF EXISTS ", sfc_name))
 	invisible(dbExecute(conn, query))
 }
+st_write.PqConnection <- function(conn, value, name, ...) {
+	dbWriteTable(conn, name, value, ...)
+}
+
 
 schema_table <- function(table, public = "public") {
 	if (!is.character(table))
@@ -239,3 +244,44 @@ get_postgis_crs = function(conn, srid, debug = FALSE) {
 	} else
 		st_crs(srid) # trust native epgs
 }
+
+# for RPostgres
+#' @importClassesFrom RPostgres PqConnection
+#' @importMethodsFrom DBI dbWriteTable
+#' @export
+setMethod("dbWriteTable", c("PqConnection", "character", "sf"),
+		  function(conn, name, value, ..., row.names = FALSE, overwrite = FALSE,
+		  		 append = FALSE, field.types = NULL, temporary = FALSE,
+		  		 copy = TRUE) {
+		  	if (!requireNamespace("RPostgres"))
+		  		stop("Missing package `RPostgres`.",
+		  			 " Use `install.packages(\"RPostgres\")` to install.", call. = FALSE)
+		  	field.types <- if (is.null(field.types)) dbDataType(conn, value)
+
+		  	geom_col <- vapply(value, inherits, TRUE, what = "sfc")
+		  	value[geom_col] <- st_as_binary(st_geometry(value), EWKB = TRUE, hex = TRUE)
+		  	value <- as.data.frame(value)
+
+		  	dbWriteTable(conn, name, value,..., row.names = row.names,
+		  				   overwrite = overwrite, append = append,
+		  				   field.types = field.types, temporary = temporary,
+		  				   copy = copy)
+		  	}
+)
+
+#' Determine database type for R vector.
+#'
+#' @export
+#' @inheritParams RPostgres dbDataType
+#' @rdname dbDataType
+#' @importClassesFrom RPostgres PqConnection
+#' @importMethodsFrom DBI dbDataType
+#' @param dbObj Postgres driver or connection.
+#' @param obj Object to convert
+setMethod("dbDataType", c("PqConnection", "sf"), function(dbObj, obj) {
+	dtyp <- callNextMethod(dbObj, obj)
+
+	gtyp <- vapply(obj, inherits, TRUE, what = "sfc")
+	dtyp[gtyp] <- "geometry"
+	return(dtyp)
+})
