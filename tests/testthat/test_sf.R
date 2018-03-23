@@ -73,5 +73,16 @@ test_that("st_as_sf bulk points work", {
   expect_identical(class(xyz_sf), c("sf", "data.frame"))
   expect_identical(class(xym_sf), c("sf", "data.frame"))
   expect_identical(class(xyzm_sf), c("sf", "data.frame"))
-  
+})
+
+test_that("renaming geometry column syncs with `sf_column`", {
+  pt1 <- st_point(1:2)
+  pt2 <- st_point(3:4)
+  s1 <- st_sf(a = c("x", "y"), geom = st_sfc(pt1, pt2))
+  s2 <- setNames(s1, toupper(names(s1)))
+  expect_equal(names(s2), toupper(names(s1)))
+  expect_equal(attr(s2, "sf_column"), "GEOM")
+  names(s1)[2] <- "geometry"
+  expect_equal(attr(s1, "sf_column"), "geometry")
+  expect_equal(names(s1), c("a", "geometry"))
 })

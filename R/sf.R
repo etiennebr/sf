@@ -80,7 +80,7 @@ st_geometry = function(obj, ...) UseMethod("st_geometry")
 
 #' @name st_geometry
 #' @export
-st_geometry.sf = function(obj, ...) { 
+st_geometry.sf = function(obj, ...) {
 	ret =  obj[[attr(obj, "sf_column")]]
 	if (!inherits(ret, "sfc")) # corrupt!
 		stop('attr(obj, "sf_column") does not point to a geometry column.\nDid you rename it, without setting st_geometry(obj) <- "newname"?')
@@ -208,7 +208,7 @@ list_column_to_sfc = function(x) {
 #' df <- st_sf(id = 1:nrows, geometry = geometry)
 #' @export
 st_sf = function(..., agr = NA_agr_, row.names,
-		stringsAsFactors = default.stringsAsFactors(), crs, precision, 
+		stringsAsFactors = default.stringsAsFactors(), crs, precision,
 		sf_column_name = NULL, check_ring_dir = FALSE) {
 	x = list(...)
 	if (length(x) == 1L && (inherits(x[[1L]], "data.frame") || (is.list(x) && !inherits(x[[1L]], "sfc"))))
@@ -416,5 +416,16 @@ merge.sf = function(x, y, ...) {
 #' @export
 as.data.frame.sf = function(x, ...) {
 	class(x) <- setdiff(class(x), "sf")
+	NextMethod()
+}
+
+#' Rename sf object
+#' @inheritParams base::names
+`names<-.sf` <- function(x, value) {
+	# Change the `sf_column` attribute if renaming a geometry
+	i <- which(names(x) == attr(x, "sf_column"))
+	if (length(i) == 1) {
+		attr(x, "sf_column") <- value[i]
+	}
 	NextMethod()
 }
