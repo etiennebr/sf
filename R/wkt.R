@@ -5,7 +5,7 @@ WKT_name = function(x, EWKT = TRUE) {
 
 	retval = if (zm == "")
 		cls[2]
-	else 
+	else
 		paste(cls[2], substr(cls[1], 3, 4))
 
 	if (EWKT && !is.null(attr(x, "epsg")) && !is.na(attr(x, "epsg")))
@@ -17,24 +17,31 @@ WKT_name = function(x, EWKT = TRUE) {
 empty = "EMPTY"
 
 # skip leading white space; ... passes on digits:
-fmt = function(x, digits) format(as.character(round(x, digits = digits)))
+fmt = function(x, ..., digits = 3) {
+	sprintf(paste0("%.", digits, "f"), x)
+}
+
 
 # print helper functions
-prnt.POINT = function(x, ..., EWKT = TRUE) {
-	pt = if (any(!is.finite(x)))
+prnt.Value = function(x, ...) {
+	if (any(!is.finite(x)))
 		empty
-	else 
-		paste0("(", paste0(fmt(x, ...), collapse = " "), ")")
-	paste(WKT_name(x, EWKT = EWKT), pt)
+	else
+		g(paste0(fmt(x, ...), collapse = " "))
+}
+
+prnt.POINT = function(x, ..., EWKT = TRUE) {
+	paste(WKT_name(prnt.Value(x), EWKT = EWKT), pt)
 }
 
 g = function(x) paste0("(", paste0(x, collapse = ", "), ")")
+
 
 prnt.Matrix = function(x, ...) {
 	if (nrow(x) == 0)
 		empty
 	else
-		g(apply(x, 1, paste, collapse = " "))
+		g(apply(x, 1, prnt.Value, collapse = " "))
 }
 
 prnt.MatrixList = function(x, ...) {
