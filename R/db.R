@@ -3,7 +3,7 @@
 #' Read PostGIS table directly through DBI and RPostgreSQL interface, converting
 #' Well-Know Binary geometries to sfc
 #' @param query SQL query to select records; see details
-#' @param EWKB logical; is the WKB is of type EWKB? if missing, defaults to
+#' @param EWKB logical; is the WKB of type EWKB? if missing, defaults to
 #'   \code{TRUE}
 #' @details if \code{table} is not given but \code{query} is, the spatial
 #'   reference system (crs) of the table queried is only available in case it
@@ -29,13 +29,14 @@ st_read.DBIObject = function(dsn = NULL,
                              layer = NULL,
                              query = NULL,
                              EWKB = TRUE,
+                             quiet = TRUE,
                              ...) {
     if (is.null(dsn))
         stop("no connection provided")
 
     # check that ellipsis contains only what is needed
     expe <- setdiff(names(list(...)), names(formals(st_sf)))
-    if(!is.null(expe)) {
+    if(length(expe) > 0) {
         # error,  these arguments would be passed to st_sf
         suggest <- NULL
         if("table" %in% expe){
