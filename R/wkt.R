@@ -5,7 +5,7 @@ WKT_name = function(x, EWKT = TRUE) {
 
 	retval = if (zm == "")
 		cls[2]
-	else 
+	else
 		paste(cls[2], substr(cls[1], 3, 4))
 
 	if (EWKT && !is.null(attr(x, "epsg")) && !is.na(attr(x, "epsg")))
@@ -17,8 +17,9 @@ WKT_name = function(x, EWKT = TRUE) {
 empty = "EMPTY"
 
 # skip leading white space; ... passes on digits:
-fmt = function(x, ..., na.encode = NULL, justify = NULL) {
-	sub("^[ ]+", "", formatC(x, ...))
+fmt = function(x, digits = getOption("digits"), ..., na.encode = NULL, justify = NULL) {
+
+	sub("^[ ]+", "", formatC(x, digits, ...))
 }
 
 # print helper functions
