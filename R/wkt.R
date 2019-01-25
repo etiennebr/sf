@@ -17,7 +17,7 @@ WKT_name = function(x, EWKT = TRUE) {
 empty = "EMPTY"
 
 # skip leading white space; ... passes on digits:
-fmt = function(x, digits = getOption("digits"), ..., na.encode = NULL, justify = NULL) {
+fmt = function(x, digits = 1, ..., na.encode = NULL, justify = NULL) {
 
 	sub("^[ ]+", "", formatC(x, digits, ...))
 }
