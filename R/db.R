@@ -425,3 +425,11 @@ is_geometry_column.default <- function(con, x, classes = c("character")) {
     vapply(x, function(x) inherits(x, classes) && !all(is.na(x)),
     	   FUN.VALUE = logical(1))
 }
+
+#' check that postgis extension is activated in connexion
+postgis_connexion <- function(con) {
+	pg_version <- tryCatch(
+		DBI::dbGetQuery(con, "select postgis_version();"),
+		error = function(e) return(FALSE))
+	if (pg_version) stop("Postgis required. Make sure to activate via")
+}

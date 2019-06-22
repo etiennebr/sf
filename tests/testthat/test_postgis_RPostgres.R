@@ -410,3 +410,8 @@ if (can_con(pg)) {
     try(DBI::dbDisconnect(pg), silent = TRUE)
 }
 
+con_yes <- DBI::dbConnect(RPostgres::Postgres(), host = "localhost", dbname = "postgis")
+con_no  <- DBI::dbConnect(RPostgres::Postgres(), host = "localhost", dbname = "new")
+
+postgis_connexion(con_yes)
+postgis_connexion(con_no)
