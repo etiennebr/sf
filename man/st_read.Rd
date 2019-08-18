@@ -9,20 +9,36 @@
 \usage{
 st_read(dsn, layer, ...)
 
-\method{st_read}{character}(dsn, layer, ..., query = NA,
-  options = NULL, quiet = FALSE, geometry_column = 1L, type = 0,
+\method{st_read}{character}(
+  dsn,
+  layer,
+  ...,
+  query = NA,
+  options = NULL,
+  quiet = FALSE,
+  geometry_column = 1L,
+  type = 0,
   promote_to_multi = TRUE,
   stringsAsFactors = default.stringsAsFactors(),
-  int64_as_string = FALSE, check_ring_dir = FALSE,
-  fid_column_name = character(0), drivers = character(0),
-  wkt_filter = character(0))
+  int64_as_string = FALSE,
+  check_ring_dir = FALSE,
+  fid_column_name = character(0),
+  drivers = character(0),
+  wkt_filter = character(0)
+)
 
-read_sf(..., quiet = TRUE, stringsAsFactors = FALSE,
-  as_tibble = TRUE)
+read_sf(..., quiet = TRUE, stringsAsFactors = FALSE, as_tibble = TRUE)
 
-\method{st_read}{DBIObject}(dsn = NULL, layer = NULL, query = NULL,
-  EWKB = TRUE, quiet = TRUE, as_tibble = FALSE,
-  geometry_column = NULL, ...)
+\method{st_read}{DBIObject}(
+  dsn = NULL,
+  layer = NULL,
+  query = NULL,
+  EWKB = TRUE,
+  quiet = TRUE,
+  as_tibble = FALSE,
+  geometry_column = NULL,
+  ...
+)
 }
 \arguments{
 \item{dsn}{data source name (interpretation varies by driver - for some
@@ -46,7 +62,7 @@ use the \code{query} argument.}
 
 \item{options}{character; driver dependent dataset open options, multiple
 options supported. For possible values, see the "Open options" section
-of the GDAL documentation of the corresponding driver, and 
+of the GDAL documentation of the corresponding driver, and
 https://github.com/r-spatial/sf/issues/1157 for an example.}
 
 \item{quiet}{logical; suppress info on name, driver, size and spatial
@@ -66,8 +82,8 @@ of LineString and MultiLineString, or of Polygon and MultiPolygon, convert
 all to the Multi variety; defaults to \code{TRUE}}
 
 \item{stringsAsFactors}{logical; logical: should character vectors be
-converted to factors?  The `factory-fresh' default is \code{TRUE} for 
-\code{st_read} and \code{FALSE} for \code{read_sf}, but this can be changed 
+converted to factors?  The `factory-fresh' default is \code{TRUE} for
+\code{st_read} and \code{FALSE} for \code{read_sf}, but this can be changed
 globally by e.g. the R command \code{options(stringsAsFactors = FALSE)}.}
 
 \item{int64_as_string}{logical; if TRUE, Int64 attributes are returned as
@@ -159,7 +175,7 @@ summary(nc) # note that AREA was computed using Euclidian area on lon/lat degree
 ## only three fields by select clause
 ## only two features by where clause
 nc_sql = st_read(system.file("shape/nc.shp", package="sf"),
-                     query = "SELECT NAME, SID74, FIPS FROM \\"nc\\" WHERE BIR74 > 20000")
+                     query = "SELECT NAME, SID74, FIPS FROM \"nc\" WHERE BIR74 > 20000")
 \dontrun{
   library(sp)
   example(meuse, ask = FALSE, echo = FALSE)
@@ -175,14 +191,14 @@ nc_sql = st_read(system.file("shape/nc.shp", package="sf"),
 ## and that geom needs to be included in the select, otherwise we don't detect it
 layer <- st_layers(system.file("gpkg/nc.gpkg", package = "sf"))$name[1]
 nc_gpkg_sql = st_read(system.file("gpkg/nc.gpkg", package = "sf"),
-   query = sprintf("SELECT NAME, SID74, FIPS, geom  FROM \\"\%s\\" WHERE BIR74 > 20000", layer))
+   query = sprintf("SELECT NAME, SID74, FIPS, geom  FROM \"%s\" WHERE BIR74 > 20000", layer))
 }
 # spatial filter, as wkt:
-wkt = st_as_text(st_geometry(nc[1,])) 
+wkt = st_as_text(st_geometry(nc[1,]))
 # filter by (bbox overlaps of) first feature geometry:
 read_sf(system.file("gpkg/nc.gpkg", package="sf"), wkt_filter = wkt)
 # read geojson from string:
-geojson_txt <- paste("{\\"type\\":\\"MultiPoint\\",\\"coordinates\\":",
+geojson_txt <- paste("{\"type\":\"MultiPoint\",\"coordinates\":",
    "[[3.2,4],[3,4.6],[3.8,4.4],[3.5,3.8],[3.4,3.6],[3.9,4.5]]}")
 x = read_sf(geojson_txt)
 x

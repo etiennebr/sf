@@ -39,10 +39,10 @@ st_sfc = function(..., crs = NA_crs_, precision = 0.0, check_ring_dir = FALSE) {
 	# if we have only one arg, which is already a list with sfg's, but NOT a geometrycollection:
 	# (this is the old form of calling st_sfc; it is way faster to call st_sfc(lst) if lst
 	# already contains a zillion sfg objects, than do.call(st_sfc, lst) ...
-	if (length(lst) == 1 && is.list(lst[[1]]) && !inherits(lst[[1]], "sfg")
-			&& (length(lst[[1]]) == 0 || inherits(lst[[1]][[1]], "sfg") || is.null(lst[[1]][[1]])))
+	if (length(lst) == 1 && is.list(lst[[1]]) && !is_sfg(lst[[1]])
+			&& (length(lst[[1]]) == 0 || is_sfg(lst[[1]][[1]]) || is.null(lst[[1]][[1]])))
 		lst = lst[[1]]
-	stopifnot(is.numeric(crs) || is.character(crs) || inherits(crs, "crs"))
+	check_crs(crs)
 
 	# check for NULLs:
 	a = attributes(lst)
@@ -106,8 +106,8 @@ st_sfc = function(..., crs = NA_crs_, precision = 0.0, check_ring_dir = FALSE) {
 		lst = check_ring_dir(lst)
 
 	# get & set crs:
-	if (is.na(crs) && !is.null(attr(lst, "crs")))
-		crs = attr(lst, "crs")
+	if (is.na(crs) && !is.null(st_crs(lst)))
+		crs = st_crs(lst)
 	st_crs(lst) = crs
 
 	# set classes attr in case of GEOMETRY
@@ -140,7 +140,6 @@ sfg_is_empty = function(x) {
 
 
 #' @export
-#"[<-.sfc" = function (x, i, j, value) {
 "[<-.sfc" = function (x, i, value) {
 	if (is.null(value) || inherits(value, "sfg"))
 		value = list(value)
@@ -204,8 +203,8 @@ print.sfc = function(x, ..., n = 5L, what = "Geometry set for", append = "") {
 		cat("\n")
 	}
 	# attributes: epsg, proj4string, precision
-	cat(paste0("epsg (SRID):    ", attr(x, "crs")$epsg, "\n"))
-	cat(paste0("proj4string:    ", attr(x, "crs")$proj4string, "\n"))
+	cat(paste0("epsg (SRID):    ", st_crs(x)$epsg, "\n"))
+	cat(paste0("proj4string:    ", st_crs(x)$proj4string, "\n"))
 	if (attr(x, "precision") != 0.0) {
 		cat(paste0("precision:      "))
 		if (attr(x, "precision") < 0.0)
@@ -234,9 +233,9 @@ print.sfc = function(x, ..., n = 5L, what = "Geometry set for", append = "") {
 #' @export
 summary.sfc = function(object, ..., maxsum = 7L, maxp4s = 10L) {
 	u = factor(vapply(object, function(x) WKT_name(x, FALSE), ""))
-    epsg = paste0("epsg:", attr(object, "crs")$epsg)
+    epsg = paste0("epsg:", st_crs(object)$epsg)
 	levels(u) = c(levels(u), epsg)
-    p4s = attr(object, "crs")$proj4string
+    p4s = st_crs(object)$proj4string
 	if (!is.na(p4s)) {
 		if (nchar(p4s) > maxp4s)
 			p4s = paste0(substr(p4s, 1L, maxp4s), "...")

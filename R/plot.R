@@ -570,7 +570,7 @@ plot_sf = function(x, xlim = NULL, ylim = NULL, asp = NA, axes = FALSE, bgc = pa
 	if (! missing(graticule)) {
 		g = if (isTRUE(graticule))
 				st_graticule(pl_reg[c(1,3,2,4)], st_crs(x), st_crs(4326), ...)
-			else if (inherits(graticule, "crs") && !is.na(graticule))
+			else if (is_crs(graticule) && !is.na(graticule))
 				st_graticule(pl_reg[c(1,3,2,4)], st_crs(x), graticule, ...)
 			else
 				graticule

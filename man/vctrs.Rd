@@ -12,15 +12,15 @@
 \usage{
 vec_ptype2.sfc(x, y, ...)
 
-\method{vec_ptype2.sfc}{default}(x, y, ..., x_arg = "x", y_arg = "y")
+\method{vec_ptype2}{sfc.default}(x, y, ..., x_arg = "x", y_arg = "y")
 
-\method{vec_ptype2.sfc}{sfc}(x, y, ...)
+\method{vec_ptype2}{sfc.sfc}(x, y, ...)
 
 vec_cast.sfc(x, to, ...)
 
-\method{vec_cast.sfc}{sfc}(x, to, ...)
+\method{vec_cast}{sfc.sfc}(x, to, ...)
 
-\method{vec_cast.sfc}{default}(x, to, ...)
+\method{vec_cast}{sfc.default}(x, to, ...)
 }
 \arguments{
 \item{x}{Vector types.}

@@ -9,14 +9,14 @@
 \alias{st_crs.sfc}
 \alias{st_crs.bbox}
 \alias{st_crs.CRS}
-\alias{st_crs.crs}
+\alias{st_crs.sf_crs}
 \alias{st_crs<-}
 \alias{st_crs<-.sf}
 \alias{st_crs<-.sfc}
 \alias{st_set_crs}
 \alias{NA_crs_}
 \alias{is.na.crs}
-\alias{$.crs}
+\alias{$.sf_crs}
 \title{Retrieve coordinate reference system from object}
 \format{An object of class \code{crs} of length 2.}
 \usage{
@@ -34,7 +34,7 @@ st_crs(x, ...)
 
 \method{st_crs}{CRS}(x, ...)
 
-\method{st_crs}{crs}(x, ...)
+\method{st_crs}{sf_crs}(x, ...)
 
 st_crs(x) <- value
 
@@ -48,7 +48,7 @@ NA_crs_
 
 \method{is.na}{crs}(x)
 
-\method{$}{crs}(x, name)
+\method{$}{sf_crs}(x, name)
 }
 \arguments{
 \item{x}{numeric, character, or object of class \link{sf} or \link{sfc}}

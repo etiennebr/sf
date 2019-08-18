@@ -63,7 +63,8 @@ Imports:
     stats,
     tools,
     units (>= 0.6-0),
-    utils
+    utils,
+    vctrs
 Suggests:
     blob,
     covr,
@@ -99,7 +100,7 @@ LinkingTo:
 VignetteBuilder: 
     knitr
 Encoding: UTF-8
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.0
 SystemRequirements: C++11, GDAL (>= 2.0.1), GEOS (>= 3.4.0),
     PROJ (>= 4.8.0)
 Collate: 

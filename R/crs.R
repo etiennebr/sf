@@ -1,16 +1,8 @@
-#  alternative, but more limiting from sp/R/CRS-methods.R, https://github.com/edzer/sp/pull/31 @hughjonesd
-#  (no longer used)
-#identicalCRS1 = function(x, y) {
-#  args_x <- strsplit(x, " +")[[1]]
-#  args_y <- strsplit(y, " +")[[1]]
-#  setequal(args_x, args_y)
-#}
-
 # this function establishes whether two crs objects are semantically identical. This is
 # the case when: (1) they are completely identical, or (2) they have identical proj4string
 # but one of them has a missing epsg ID.
 #' @export
-Ops.crs <- function(e1, e2) {
+Ops.sf_crs <- function(e1, e2) {
 	if (nargs() == 1)
 		stop(paste("unary", .Generic, "not defined for \"crs\" objects"), call. = FALSE)
 
@@ -60,11 +52,11 @@ st_crs.sf = function(x, ...) st_crs(st_geometry(x), ...)
 #' @export
 st_crs.numeric = function(x, proj4text = "", valid = TRUE, ...) {
     if (!valid)
-        return(structure(list(epsg = x, proj4string = proj4text), class = "crs"))
+        return(structure(list(epsg = x, proj4string = proj4text), class = "sf_crs"))
     if (proj4text != "")
         warning("`proj4text` is not used to validate crs. Remove `proj4text` ",
                 "argument or set `valid = FALSE` to stop warning.")
-    make_crs(x)
+    new_crs(x)
 }
 
 #' @name st_crs
@@ -72,9 +64,9 @@ st_crs.numeric = function(x, proj4text = "", valid = TRUE, ...) {
 #' @param wkt character well-known-text representation of the crs
 st_crs.character = function(x, ..., wkt) {
 	if (missing(wkt))
-		make_crs(x)
+		new_crs(x)
 	else
-		make_crs(wkt, wkt = TRUE)
+		new_crs(wkt, wkt = TRUE)
 }
 
 #' @name st_crs
@@ -82,22 +74,20 @@ st_crs.character = function(x, ..., wkt) {
 #' @export
 st_crs.sfc = function(x, ..., parameters = FALSE) {
 	crs = attr(x, "crs")
+	if (is.null(crs)) {
+		crs = new_crs()
+	}
 	if (parameters) {
-		if (is.na(crs))
-			list()
-		else
-			crs_parameters(crs)
-	} else
-		crs
+		if (is.na(crs)) return(list)
+		return(crs_parameters(crs))
+	}
+	crs
 }
 
 #' @name st_crs
 #' @export
 st_crs.bbox = function(x, ...) {
-	if (is.null(attr(x, "crs")))
-		NA_crs_
-	else
-		attr(x, "crs")
+	st_crs(x)
 }
 
 #' @name st_crs
@@ -106,10 +96,10 @@ st_crs.CRS = function(x, ...) st_crs(x@projargs)
 
 #' @name st_crs
 #' @export
-st_crs.crs = function(x, ...) x
+st_crs.sf_crs = function(x, ...) x
 
 #' @export
-st_crs.default = function(x, ...) NA_crs_
+st_crs.default = function(x, ...) new_crs(x, ...)
 
 #' Set or replace coordinate reference system from object
 #'
@@ -142,31 +132,59 @@ valid_proj4string = function(p4s) {
 	structure(CPL_proj_is_valid(p4s), names = c("valid", "result"))
 }
 
-# return crs object from crs, integer, or character string
-make_crs = function(x, wkt = FALSE) {
+# Create crs object from crs, CRS, integer, or character string
+create_crs = function(x, wkt) {
+	check_crs(x)
 
-	if (inherits(x, "CRS"))
-		x = x@projargs
+	if (is_sf(x) || is_sfc(x) || is_sfg(x)) {
+		return(new_crs_from_sf(x))
+	}
+	if (is_crs(x)) {
+		return(x)
+	}
+	if (is.na(x)) {
+		return(NA_crs_)
+	}
+	if (wkt) {
+		return(new_crs_from_wkt(x))
+	}
+	if (is.numeric(x)) {
+		return(new_crs_from_integer(x))
+	}
 
-	if (wkt)
-		CPL_crs_from_wkt(x)
-	else if (is.na(x))
-		NA_crs_
-	else if (inherits(x, "crs"))
-		x
-	else if (is.numeric(x))
-		CPL_crs_from_epsg(as.integer(x))
-	else if (is.character(x)) {
-		is_valid = valid_proj4string(x)
-		if (! is_valid$valid)
-			stop(paste0("invalid crs: ", x, ", reason: ", is_valid$result), call. = FALSE)
-		u = `$.crs`(list(proj4string = x), "units")
-		crs = CPL_crs_from_proj4string(x)
-		if (!is.na(crs) && !is.null(u) && crs$units != u) # gdal converts unrecognized units into m...
-			stop(paste0("units ", u, " not recognized: older GDAL version?"), call. = FALSE) # nocov
-		crs
-	} else
-		stop(paste("cannot create a crs from an object of class", class(x)), call. = FALSE)
+	return(new_crs_from_character(x))
+}
+
+new_crs_from_wkt <- function(x) {
+	CPL_crs_from_wkt(x)
+}
+new_crs_from_integer <- function(x) {
+	CPL_crs_from_epsg(vec_cast(x, integer()))
+}
+new_crs_from_sf <- function(x) {
+	new_crs(attr(x, "sf_crs"))
+}
+
+new_crs_from_character <- function(x) {
+	is_valid = valid_proj4string(x)
+	if (!is_valid$valid) {
+		stop("Invalid crs: ", x, ", reason: ", is_valid$result, call. = FALSE)
+	}
+	u = `$.sf_crs`(list(proj4string = x), "units")
+	crs = CPL_crs_from_proj4string(x)
+	if (!is.null(u) && crs$units != u) {
+		# gdal converts unrecognized units into m...
+		stop("Units ", u, " not recognized. Maybe your GDAL version is too old", call. = FALSE) # nocov
+	}
+	new_crs(crs)
+}
+
+new_crs <- function(x = NA, wkt = FALSE) {
+	x <- create_crs(x, wkt = wkt)
+	# todo: the crs structure is created using `get_crs` (cpp) except for
+	# `NA_crs_`. We could instead have a single function here to finalize the
+	# structure.
+	new_vctr(x, class = "sf_crs")
 }
 
 #' @name st_crs
@@ -176,13 +194,9 @@ make_crs = function(x, wkt = FALSE) {
 #' sfc
 #' @export
 `st_crs<-.sfc` = function(x, value) {
+	start_crs = st_crs(x)
 
-	if (is.null(attr(x, "crs")))
-		start_crs = NA_crs_
-	else
-		start_crs = st_crs(x)
-
-	end_crs = make_crs(value)
+	end_crs = st_crs(value)
 
 	if (!is.na(start_crs) && !is.na(end_crs) && start_crs != end_crs)
 		warning("st_crs<- : replacing crs does not reproject data; use st_transform for that", call. = FALSE)
@@ -219,7 +233,7 @@ st_is_longlat = function(x) {
 			bb = st_bbox(x)
 			# check for potentially meaningless value range:
 			eps = sqrt(.Machine$double.eps)
-			if (all(!is.na(unclass(bb))) && 
+			if (all(!is.na(unclass(bb))) &&
 					(bb["xmin"] < (-180-eps) || bb["xmax"] > (360+eps) || bb["ymin"] < (-90-eps) || bb["ymax"] > (90+eps)))
 				warning("bounding box has potentially an invalid value range for longlat data")
 		}
@@ -256,7 +270,7 @@ udunits_from_proj = list(
 crs_parameters = function(x) {
 	stopifnot(!is.na(x))
 	ret = structure(CPL_crs_parameters(x$proj4string),
-		names = c("SemiMajor", "SemiMinor", "InvFlattening", "units_gdal", 
+		names = c("SemiMajor", "SemiMinor", "InvFlattening", "units_gdal",
 			"IsVertical", "WktPretty", "Wkt"))
 	units(ret$SemiMajor) = as_units("m")
 	units(ret$SemiMinor) = as_units("m")
@@ -306,7 +320,7 @@ is.na.crs = function(x) {
 #' st_crs("+init=epsg:3857 +units=m")$b     # numeric
 #' st_crs("+init=epsg:3857 +units=m")$units # character
 #' @export
-`$.crs` = function(x, name) {
+`$.sf_crs` = function(x, name) {
 	if (is.numeric(name) || name %in% names(x))
 		x[[name]]
 	else {

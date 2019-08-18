@@ -179,7 +179,7 @@ process_cpl_read_ogr = function(x, quiet = FALSE, ..., check_ring_dir = FALSE,
 		x[[ nm.lc[i] ]] = list.cols[[i]]
 
 	for (i in seq_along(geom))
-		x[[ nm[i] ]] = st_sfc(geom[[i]], crs = attr(geom[[i]], "crs")) # computes bbox
+		x[[ nm[i] ]] = st_sfc(geom[[i]], crs = st_crs(geom[[i]])) # computes bbox
 
 	x = st_as_sf(x, ...,
 		sf_column_name = if (is.character(geometry_column)) geometry_column else nm[geometry_column],

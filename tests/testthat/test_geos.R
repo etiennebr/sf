@@ -198,7 +198,7 @@ test_that("st_difference works with partially overlapping geometries", {
 	# check that output geometries have correct attributes
 	expect_equal(attr(out1, "idx"), seq_len(3))
 	#expect_equal(attr(out2, "idx"), seq_len(3))
-	expect_equal(attr(out1, "crs"), attr(in1, "crs"))
+	expect_equal(st_crs(out1), st_crs(in1))
 	expect_equal(st_crs(out2), st_crs(in2))
 	# check that output geometries are actually correct
 	expect_equal(length(out1), 3)
@@ -231,7 +231,7 @@ test_that("st_difference works with fully contained geometries", {
 	# check that output geometries have correct attributes
 	expect_equal(attr(out1, "idx"), c(1L, 3L))
 	#expect_equal(attr(out2, "idx"), c(1L, 3L))
-	expect_equal(attr(out1, "crs"), attr(in1, "crs"))
+	expect_equal(st_crs(out1), st_crs(in1))
 	expect_equal(st_crs(out2), st_crs(in2))
 	# check that output geometries are actually correct
 	expect_equal(length(out1), 2)

@@ -261,7 +261,7 @@ Rcpp::List get_crs(OGRSpatialReference *ref) {
 	nms(0) = "epsg";
 	nms(1) = "proj4string";
 	crs.attr("names") = nms;
-	crs.attr("class") = "crs";
+	crs.attr("class") = "sf_crs";
 	return crs;
 }
 

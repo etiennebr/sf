@@ -17,8 +17,8 @@ test_that("st_crs works", {
   #expect_warning(st_crs(nc2) <- 1000, "not found in EPSG") -> changes in gdal 2.5.0
   expect_silent(st_crs(nc1) <- st_crs(nc1))
 
-  expect_error(st_crs("+proj=ll"), "invalid crs")
-  expect_error(st_crs("+proj=longlat +datum=NAD26"), "invalid crs")
+  expect_error(st_crs("+proj=ll"), "Invalid crs")
+  expect_error(st_crs("+proj=longlat +datum=NAD26"), "Invalid crs")
   expect_silent(st_crs("+proj=longlat"))
   expect_silent(st_crs("+proj=longlat +datum=NAD27"))
   a <- st_crs(4326)
@@ -43,21 +43,21 @@ test_that("st_proj_info works for datum files", {
   expect_silent(x <- st_proj_info("have_datum_files"))
 })
 
-test_that("$.crs works", {
+test_that("$.sf_crs works", {
   skip_if_not(sf_extSoftVersion()[["proj.4"]] < "6.0.0")
   expect_true(is.numeric(st_crs("+init=epsg:3857")$epsg))
   expect_true(is.character(st_crs("+init=epsg:3857")$proj4string))
 })
 
-test_that("$.crs works with +units", {
+test_that("$.sf_crs works with +units", {
   skip_if_not(sf_extSoftVersion()[["proj.4"]] < "6.0.0")
-  expect_true(is.numeric(st_crs("+init=epsg:3857 +units=m")$b)) 
+  expect_true(is.numeric(st_crs("+init=epsg:3857 +units=m")$b))
   expect_true(is.character(st_crs("+init=epsg:3857 +units=m")$units))
 })
 
-test_that("$.crs works 2", {
+test_that("$.sf_crs works 2", {
   skip_if_not(sf_extSoftVersion()[["GDAL"]] < "2.5.0" && sf_extSoftVersion()[["proj.4"]] < "6.0.0")
-  expect_true(is.numeric(st_crs("+init=epsg:3857 +units=km")$b)) 
+  expect_true(is.numeric(st_crs("+init=epsg:3857 +units=km")$b))
   expect_true(is.character(st_crs("+init=epsg:3857 +units=km")$units))
 })
 
