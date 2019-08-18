@@ -636,7 +636,7 @@ sf.colors = function (n = 10, cutoff.tails = c(0.35, 0.2), alpha = 1, categorica
 			cb = paste0(cb, as.hexmode(ceiling(alpha * 255)))
 		rep(cb, length.out = n)
 	} else {
-		i = seq(0.5 * cutoff.tails[1], 1 - 0.5 * cutoff.tails[2], length = n)
+		i = seq(0.5 * cutoff.tails[1], 1 - 0.5 * cutoff.tails[2], length.out = n)
    		r = ifelse(i < .25, 0, ifelse(i < .57, i / .32 - .78125, 1))
    		g = ifelse(i < .42, 0, ifelse(i < .92, 2 * i - .84, 1))
    		b = ifelse(i < .25, 4 * i, ifelse(i < .42, 1,
@@ -785,14 +785,14 @@ bb2merc = function(x, cls = "ggmap") { # return bbox in the appropriate "web mer
 	poly = vector(mode="list", length(col))
 	for (i in seq(poly))
 		poly[[i]] = c(breaks[i], breaks[i+1], breaks[i+1], breaks[i])
-	plot(1, 1, t = "n", ylim = ylim, xlim = xlim, axes = FALSE,
+	plot(1, 1, type = "n", ylim = ylim, xlim = xlim, axes = FALSE,
 		xlab = "", ylab = "", xaxs = "i", yaxs = "i")
 	offset = 0.2
 	offs = switch(key.pos,
 		c(0,0,-offset,-offset),
 		c(0,0,-offset,-offset),
 		c(offset,offset,0,0),
-		c(offset,offset,0,0)) 
+		c(offset,offset,0,0))
 	for(i in seq_along(poly)) {
 		if (key.pos %in% c(1,3))
 			polygon(poly[[i]], c(0, 0, 1, 1) + offs, col = col[i], border = NA)
@@ -854,7 +854,7 @@ bb2merc = function(x, cls = "ggmap") { # return bbox in the appropriate "web mer
 	poly = vector(mode="list", length(col))
 	for (i in seq(poly))
 		poly[[i]] = c(breaks[i], breaks[i+1], breaks[i+1], breaks[i])
-	plot(1, 1, t = "n", ylim = ylim, xlim = xlim, axes = FALSE,
+	plot(1, 1, type = "n", ylim = ylim, xlim = xlim, axes = FALSE,
 		xlab = "", ylab = "", xaxs = "i", yaxs = "i")
 	for(i in seq_along(poly)) {
 		if (key.pos %in% c(1,3))
