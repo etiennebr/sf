@@ -160,8 +160,10 @@ st_crs.default = function(x, ...) NA_crs_
 	x
 }
 
+make_crs = function(x) UseMethod("make_crs")
+
 # return crs object from crs, integer, or character string
-make_crs = function(x) {
+make_crs.default = function(x) {
 
 	if (inherits(x, "CRS")) {
 		x = if (is.null(comment(x)) || (CPL_proj_version() < "6.0.0" || 
@@ -191,6 +193,11 @@ make_crs = function(x) {
 		CPL_crs_from_input(x)
 	} else
 		stop(paste("cannot create a crs from an object of class", class(x)), call. = FALSE)
+}
+
+make_crs.sf = function(x) {
+	x = st_crs(x)
+	NextMethod()
 }
 
 #' @name st_crs

@@ -6,7 +6,7 @@ test_that("st_crs works", {
   nc3 = st_read(system.file("shape/nc.shp", package="sf"), "nc", crs = NA, quiet = TRUE)
   crs_4267 <- st_crs(4267)
   expect_equal(st_crs(nc1)[1:2], crs_4267[1:2])
-  # expect_equal(st_crs(nc2)[1:2], crs_4267[1:2]) 
+  # expect_equal(st_crs(nc2)[1:2], crs_4267[1:2])
   expect_equal(st_crs(nc3), NA_crs_)
   expect_equal(st_set_crs(nc3, 4267) %>% st_crs, crs_4267)
   # expect_equal(st_crs(nc1)[1:2], st_crs(nc2)[1:2])
@@ -55,13 +55,13 @@ test_that("$.crs works", {
 
 test_that("$.crs works with +units", {
   skip_if_not(sf_extSoftVersion()[["proj.4"]] < "6.0.0")
-  expect_true(is.numeric(st_crs("+init=epsg:3857 +units=m")$b)) 
+  expect_true(is.numeric(st_crs("+init=epsg:3857 +units=m")$b))
   expect_true(is.character(st_crs("+init=epsg:3857 +units=m")$units))
 })
 
 test_that("$.crs works 2", {
   skip_if_not(sf_extSoftVersion()[["GDAL"]] < "2.5.0" && sf_extSoftVersion()[["proj.4"]] < "6.0.0")
-  expect_true(is.numeric(st_crs("+init=epsg:3857 +units=km")$b)) 
+  expect_true(is.numeric(st_crs("+init=epsg:3857 +units=km")$b))
   expect_true(is.character(st_crs("+init=epsg:3857 +units=km")$units))
 })
 
@@ -109,4 +109,9 @@ test_that("crs.Raster works", {
   r = raster()
   x = st_crs(r)
   expect_equal(class(x), "crs")
+})
+
+test_that("can create crs from sf object", {
+  x = st_sf(a = 1, geom = st_as_sfc("SRID=4326;POINT(1 1)"))
+  expect_equal(st_crs(4326), make_crs(x))
 })
