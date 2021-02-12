@@ -131,7 +131,7 @@ st_read.DBIObject = function(dsn = NULL,
     	blob_columns = vapply(tbl, inherits, logical(1), "blob")
 		success = FALSE
 		for (i in which(blob_columns)) {
-			try(sfc <- st_as_sfc(tbl[[i]]), silent = TRUE)
+			sfc <- try(st_as_sfc(tbl[[i]]), silent = TRUE)
 			if (!inherits(sfc, "try-error")) {
 				tbl[[i]] = sfc
 				success = TRUE
@@ -168,8 +168,8 @@ st_read.PostgreSQLConnection <- function(...) {
     st_read.DBIObject(...)
 }
 
-postgis_as_sfc <- function(x, EWKB, conn) {
-	geom <- st_as_sfc(as_wkb(x), EWKB = EWKB)
+postgis_as_sfc <- function(x, EWKB, conn, spatialite) {
+	geom <- st_as_sfc(as_wkb(x), EWKB = EWKB, spatialite = spatialite)
 	srid <- attr(geom, "srid")
 	if (!is.null(srid)) {
 		st_crs(geom) = db_find_srid(conn, srid = srid, validate = FALSE)
